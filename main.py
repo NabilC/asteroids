@@ -1,7 +1,11 @@
+import sys
 import pygame
+from circleshape import CircleShape
+from asteroid import Asteroid
+from asteroidfield import AsteroidField
 from player import Player
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
-from logger import log_state
+from logger import *
 
 def main():
     print("Starting Asteroids with pygame version: VERSION")
@@ -15,9 +19,16 @@ def main():
     # create two empty groups
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
 
     # add player class to updatable and drawable before player object instance is created
     Player.containers = (updatable, drawable)
+
+    Asteroid.containers = (asteroids, updatable, drawable)
+    AsteroidField.containers = updatable
+    asteroid_field = AsteroidField()
+    shots.containers = (shots, drawable, updatable)
 
     # create the player - it gets auto added to both groups
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
@@ -39,6 +50,13 @@ def main():
         # loop over all "drawables" and .draw() them individually
         for obj in drawable:
             obj.draw(screen)
+
+        # loop over asteroids group and check if any collide with player
+        for asteroid in asteroids:
+            if asteroid.collides_with(player):
+                log_event("player_hit")
+                print("Game over!")
+                sys.exit()
 
         pygame.display.flip()
 
